@@ -13,17 +13,55 @@ var boxPadding = 20;
 var defaultSvgPathDef = 'M 10 10 C 20 20, 40 20, 50 10';
 var loadedSvgPathDef = localStorage.getItem('svg-path-def') || defaultSvgPathDef;
 
-function convertSvgPathDefToJcanvasPath(svgPathDef) {
-	var parts = svgPathDef.split(/(,?\s*)|(\s+)/);
-	return {
-		p1: {
+var svgPathFunctions = {
+	L: function (x, y) {
+		return {
+			type: 'line',
+			x2: x, y2: y
+		};
+	},
+	Q: function (cx1, cy1, x2, y2) {
+		return {
+			type: 'quadratic',
+			cx1: cx1, cy1: cy1,
+			x2: x2, y2: y2
+		};
+	},
+	C: function (cx1, cy1, cx2, cy2, x2, y2) {
+		return {
 			type: 'bezier',
-			x1: 130, y1: 110,
-			cx1: 120, cy1: 140,
-			cx2: 180, cy2: 140,
-			x2: 170, y2: 110
+			cx1: cx1, cy1: cy1,
+			cx2: cx2, cy2: cy2,
+			x2: x2, y2: y2
+		};
+	}
+};
+
+function convertSvgPathDefToJcanvasPath(svgPathDef) {
+	var parts = svgPathDef.split(/,\s*|\s+/);
+	var pathObject = {};
+	var currentSubpathObject = {};
+	var subpathCount = 0;
+	for (var i = 0; i < parts.length; i += 1) {
+		var part = parts[i];
+		if (part === 'M') {
+			// The jCanvas API doesn't really have a equivalent to the Move (M)
+			// command, so we must handle it separately
+			currentSubpathObject.x1 = Number(parts[i + 1]);
+			currentSubpathObject.y1 = Number(parts[i + 2]);
+		} else if (part === 'Z') {
+			pathObject.closed = true;
+		} else if (svgPathFunctions[part]) {
+			currentSubpathObject = Object.assign(
+				currentSubpathObject,
+				svgPathFunctions[part].apply(this, parts.slice(i + 1).map(Number))
+			);
+			subpathCount += 1;
+			pathObject['p' + subpathCount] = currentSubpathObject;
+			currentSubpathObject = {};
 		}
-	};
+	}
+	return pathObject;
 }
 
 function getViewBoxFromSvgPathDef(svgPathDef) {
@@ -44,7 +82,6 @@ function getViewBoxFromSvgPathDef(svgPathDef) {
 		width: maxXValue - minXValue + (boxPadding * 2),
 		height: maxYValue - minYValue + (boxPadding * 2)
 	};
-	console.log('viewBox', viewBox);
 	return viewBox;
 }
 
@@ -72,7 +109,9 @@ function drawCanvas(viewBox, svgPathDef) {
 		width: viewBox.width,
 		height: viewBox.height
 	});
+	$renderedCanvas.removeLayers();
 	$renderedCanvas.scaleCanvas({
+		layer: true,
 		scale: pixelRatio
 	});
 	$renderedCanvas.translateCanvas({
@@ -80,14 +119,14 @@ function drawCanvas(viewBox, svgPathDef) {
 		translateX: -viewBox.x,
 		translateY: -viewBox.y
 	});
-	$renderedCanvas.removeLayers();
 	$renderedCanvas.drawPath(Object.assign({
 		layer: true,
 		strokeStyle: pathStrokeStyle,
 		strokeWidth: pathStrokeWidth
 	}, convertSvgPathDefToJcanvasPath(svgPathDef)));
 	$renderedCanvas.restoreCanvas({
-		layer: true
+		layer: true,
+		count: 2
 	});
 }
 
