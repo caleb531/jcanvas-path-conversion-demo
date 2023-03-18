@@ -1,0 +1,32 @@
+body {
+	max-width: 800px;
+	margin: 0 auto;
+	background-color: #148;
+	font-family: 'Open Sans', sans-serif;
+	text-align: center;
+	user-select: none;
+	color: #fff;
+}
+h1 {
+	margin: 0;
+	margin-top: 10px;
+}
+p {
+	margin: 10px 0;
+}
+svg,
+canvas {
+	display: inline-block;
+	width: auto;
+	background-color: #fff;
+	border: solid 1px #000;
+	color: #fff;
+}
+input[type='text'],
+textarea {
+	border: solid 1px #000;
+	border-radius: 5px;
+	padding: 5px 10px;
+	font-family: monospace;
+	font-size: 24px;
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>jCanvas Path Conversion Demo</title>
+	<link rel="stylesheet" href="main.css" />
+</head>
+<body>
+
+	<h1>jCanvas Path Conversion Demo</h1>
+
+	<p>Convert an SVG path to a jCanvas path layer.<br />Please note that arc paths (with the 'A' command) are currently unsupported.</p>
+
+	<div id	="editor">
+		<textarea type="text" id="svg-path-def" rows="5" placeholder="Your SVG path definition here...""></textarea>
+	</div>
+
+	<svg id="rendered-svg">
+		<path id="rendered-svg-path"></path>
+	</svg>
+
+	<canvas id="rendered-canvas"></canvas>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jcanvas/20.2.0/min/jcanvas.min.js"></script>
+	<script src="main.js"></script>
+</body>
+</html>
