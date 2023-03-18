@@ -13,6 +13,8 @@ var boxPadding = 20;
 var defaultSvgPathDef = 'M 10 10 C 20 20, 40 20, 50 10';
 var loadedSvgPathDef = localStorage.getItem('svg-path-def') || defaultSvgPathDef;
 
+/* The core of the path conversion algotithm */
+
 var svgPathFunctions = {
 	L: function (x, y) {
 		return {
@@ -63,6 +65,8 @@ function convertSvgPathDefToJcanvasPath(svgPathDef) {
 	}
 	return pathObject;
 }
+
+/* End algorithm */
 
 function getViewBoxFromSvgPathDef(svgPathDef) {
 	var coords = (svgPathDef.match(/\-?\d+(?:\.\d+)?/g) || []).map(Number);
