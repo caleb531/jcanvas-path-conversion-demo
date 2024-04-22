@@ -155,6 +155,21 @@ $.jCanvas.extend({
 		// Restore canvas context
 		ctx.restore();
 	}
+	if (params.mask) {
+		var data = $.data(this, 'jCanvas');
+		// If jCanvas autosave is enabled
+		if (params.autosave) {
+			ctx.save();
+			var transforms = $.extend({}, data.transforms);
+			// Clone the object's masks array
+			transforms.masks = transforms.masks.slice(0);
+			data.savedTransforms.push(transforms);
+		}
+		// Clip the current path
+		ctx.clip(path);
+		// Keep track of current masks
+		data.transforms.masks.push(params._args);
+	}
   }
 });
 
