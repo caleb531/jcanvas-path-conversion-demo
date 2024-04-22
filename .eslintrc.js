@@ -13,7 +13,9 @@ module.exports = {
     // jQuery global variables
     'jquery': true,
     // Node.js global variables and Node.js scoping
-    'node': true
+    'node': true,
+    // ES6 features (like Sets)
+    'es6': true
 
   },
 

@@ -10,7 +10,9 @@ var pathStrokeStyle = '#000';
 var pathStrokeWidth = 2;
 var boxPadding = 20;
 
-var defaultSvgPathDef = 'M 10 10 C 20 20, 40 20, 50 10';
+var defaultWidth = 400;
+var defaultHeight = 320;
+var defaultSvgPathDef = 'm46 71c-12.2 0-22-9.8-22-22 0-12.2 9.8-22 22-22 12.2 0 22 9.8 22 22 0 12.2-9.8 22-22 22z m103.5 159c-20.2 0-36.5-16.3-36.5-36.5 0-20.2 16.3-36.5 36.5-36.5 20.2 0 36.5 16.3 36.5 36.5 0 20.2-16.3 36.5-36.5 36.5z';
 var loadedSvgPathDef = localStorage.getItem('svg-path-def') || defaultSvgPathDef;
 
 /* The core of the path conversion algotithm */
@@ -76,15 +78,33 @@ function getViewBoxFromSvgPathDef(svgPathDef) {
 	var yCoords = coords.filter(function (coord, i) {
 		return i % 2 === 1;
 	});
-	var minXValue = Math.min.apply(Math, xCoords);
-	var minYValue = Math.min.apply(Math, yCoords);
-	var maxXValue = Math.max.apply(Math, xCoords);
-	var maxYValue = Math.max.apply(Math, yCoords);
+
+	if (!xCoords || !yCoords) {
+		return {
+			x: 0,
+			y: 0,
+			width: defaultWidth,
+			height: defaultHeight
+		};
+	}
+
+	var minXValue1 = Math.min(...xCoords) || 0;
+	var minXValue2 = Math.min(...xCoords.filter((x) => x !== minXValue1)) || 0;
+
+	var minYValue1 = Math.min(...yCoords) || 0;
+	var minYValue2 = Math.min(...yCoords.filter((y) => y !== minYValue1)) || 0;
+
+	var maxXValue1 = Math.max(...xCoords) || 0;
+	var maxXValue2 = Math.max(...xCoords.filter((x) => x !== maxXValue1)) || 0;
+
+	var maxYValue1 = Math.max(...yCoords) || 0;
+	var maxYValue2 = Math.max(...yCoords.filter((y) => y !== maxYValue1)) || 0;
+
 	var viewBox = {
-		x: minXValue - boxPadding,
-		y: minYValue - boxPadding,
-		width: maxXValue - minXValue + (boxPadding * 2),
-		height: maxYValue - minYValue + (boxPadding * 2)
+		x: minXValue1 - minYValue2 - boxPadding,
+		y: minYValue1 - minYValue2 - boxPadding,
+		width: maxXValue1 - minXValue1 + maxXValue2 + (boxPadding * 2),
+		height: maxYValue1 - minYValue1 + maxYValue2 + (boxPadding * 2)
 	};
 	return viewBox;
 }
@@ -100,6 +120,44 @@ function drawSvg(viewBox, svgPathDef) {
 	$renderedSvgPath.attr('stroke-width', pathStrokeWidth);
 	$renderedSvgPath.attr('d', svgPathDef);
 }
+
+// A custom jCanvas method you can use to render an SVG path onto a canvas
+$.jCanvas.extend({
+  name: 'drawSvgPath',
+  type: 'svgPath',
+  props: {},
+  fn: function (ctx, params) {
+    // Just to keep our lines short
+    var p = params;
+    // Enable layer transformations like scale and rotate
+    $.jCanvas.transformShape(this, ctx, p);
+    // Draw heart
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y + p.radius);
+    // Draw SVG path
+	var path = new Path2D(p.d);
+    // Call the detectEvents() function to enable jCanvas events
+    // Be sure to pass it these arguments, too!
+    $.jCanvas.detectEvents(this, ctx, p);
+	// Close newly-created path manually (jCanvas doesn't support closing a
+	// Path2D object)
+    ctx.fill(path);
+	// Prevent extra shadow created by stroke (but only when fill is present)
+	if (p.fillStyle !== 'transparent') {
+		ctx.shadowColor = 'transparent';
+	}
+	if (p.strokeWidth !== 0) {
+		// Only stroke if the stroke is not 0
+		ctx.stroke(path);
+	}
+	// If shape has been transformed by jCanvas
+	if (params._transformed) {
+		// Restore canvas context
+		ctx.restore();
+	}
+  }
+});
+
 function drawCanvas(viewBox, svgPathDef) {
 	// Optimize canvas for high-density displays; normally, we would use
 	// detectPixelRatio(), but that can be finicky when working with layers, and
@@ -123,11 +181,12 @@ function drawCanvas(viewBox, svgPathDef) {
 		translateX: -viewBox.x,
 		translateY: -viewBox.y
 	});
-	$renderedCanvas.drawPath(Object.assign({
+	$renderedCanvas.drawSvgPath({
 		layer: true,
-		strokeStyle: pathStrokeStyle,
-		strokeWidth: pathStrokeWidth
-	}, convertSvgPathDefToJcanvasPath(svgPathDef)));
+		strokeStyle: '#000',
+		strokeWidth: 2,
+		d: 'm46 71c-12.2 0-22-9.8-22-22 0-12.2 9.8-22 22-22 12.2 0 22 9.8 22 22 0 12.2-9.8 22-22 22z m103.5 159c-20.2 0-36.5-16.3-36.5-36.5 0-20.2 16.3-36.5 36.5-36.5 20.2 0 36.5 16.3 36.5 36.5 0 20.2-16.3 36.5-36.5 36.5z'
+	});
 	$renderedCanvas.restoreCanvas({
 		layer: true,
 		count: 2
