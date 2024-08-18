@@ -1,0 +1,16 @@
+{
+  "name": "jcanvas-path-conversion-demo",
+  "description": "A demonstration of drawing SVG paths with jCanvas",
+  "keywords": [
+    "jcanvas",
+    "jquery",
+    "svg",
+    "paths"
+  ],
+  "author": "Caleb Evans",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caleb531/jcanvas-panzoom-demo.git"
+  },
+  "license": "MIT"
+}
