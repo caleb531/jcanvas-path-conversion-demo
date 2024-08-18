@@ -71,7 +71,7 @@ function convertSvgPathDefToJcanvasPath(svgPathDef) {
 /* End algorithm */
 
 function getViewBoxFromSvgPathDef(svgPathDef) {
-	var coords = (svgPathDef.match(/\-?\d+(?:\.\d+)?/g) || []).map(Number);
+	var coords = (svgPathDef.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
 	var xCoords = coords.filter(function (coord, i) {
 		return i % 2 === 0;
 	});
@@ -180,4 +180,4 @@ $svgPathDef.val(loadedSvgPathDef);
 draw();
 
 });
-}(jQuery));
+}(window.jQuery));

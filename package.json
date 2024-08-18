@@ -12,5 +12,9 @@
     "type": "git",
     "url": "git+https://github.com/caleb531/jcanvas-panzoom-demo.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "globals": "^15.9.0"
+  }
 }
