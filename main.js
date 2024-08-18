@@ -121,58 +121,6 @@ function drawSvg(viewBox, svgPathDef) {
 	$renderedSvgPath.attr('d', svgPathDef);
 }
 
-// A custom jCanvas method you can use to render an SVG path onto a canvas
-$.jCanvas.extend({
-  name: 'drawSvgPath',
-  type: 'svgPath',
-  props: {},
-  fn: function (ctx, params) {
-    // Just to keep our lines short
-    var p = params;
-    // Enable layer transformations like scale and rotate
-    $.jCanvas.transformShape(this, ctx, p);
-    // Draw heart
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y + p.radius);
-    // Draw SVG path
-	var path = new Path2D(p.d);
-    // Call the detectEvents() function to enable jCanvas events
-    // Be sure to pass it these arguments, too!
-    $.jCanvas.detectEvents(this, ctx, p);
-	// Close newly-created path manually (jCanvas doesn't support closing a
-	// Path2D object)
-    ctx.fill(path);
-	// Prevent extra shadow created by stroke (but only when fill is present)
-	if (p.fillStyle !== 'transparent') {
-		ctx.shadowColor = 'transparent';
-	}
-	if (p.strokeWidth !== 0) {
-		// Only stroke if the stroke is not 0
-		ctx.stroke(path);
-	}
-	// If shape has been transformed by jCanvas
-	if (params._transformed) {
-		// Restore canvas context
-		ctx.restore();
-	}
-	if (params.mask) {
-		var data = $.data(this, 'jCanvas');
-		// If jCanvas autosave is enabled
-		if (params.autosave) {
-			ctx.save();
-			var transforms = $.extend({}, data.transforms);
-			// Clone the object's masks array
-			transforms.masks = transforms.masks.slice(0);
-			data.savedTransforms.push(transforms);
-		}
-		// Clip the current path
-		ctx.clip(path);
-		// Keep track of current masks
-		data.transforms.masks.push(params._args);
-	}
-  }
-});
-
 function drawCanvas(viewBox, svgPathDef) {
 	// Optimize canvas for high-density displays; normally, we would use
 	// detectPixelRatio(), but that can be finicky when working with layers, and
@@ -196,11 +144,19 @@ function drawCanvas(viewBox, svgPathDef) {
 		translateX: -viewBox.x,
 		translateY: -viewBox.y
 	});
-	$renderedCanvas.drawSvgPath({
+	$renderedCanvas.drawPath({
 		layer: true,
+		mask: true,
 		strokeStyle: '#000',
 		strokeWidth: 2,
 		d: 'm46 71c-12.2 0-22-9.8-22-22 0-12.2 9.8-22 22-22 12.2 0 22 9.8 22 22 0 12.2-9.8 22-22 22z m103.5 159c-20.2 0-36.5-16.3-36.5-36.5 0-20.2 16.3-36.5 36.5-36.5 20.2 0 36.5 16.3 36.5 36.5 0 20.2-16.3 36.5-36.5 36.5z'
+	});
+	$renderedCanvas.drawRect({
+		layer: true,
+		fillStyle: '#c33',
+		x: 50, y: 50,
+		width: 100, height: 150,
+		fromCenter: false
 	});
 	$renderedCanvas.restoreCanvas({
 		layer: true,
